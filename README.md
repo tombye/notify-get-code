@@ -15,10 +15,10 @@ npm install
 
 Run the script for an email token:
 ```bash
-node get-code.js email
+node get_code.js email
 ```
 
 Run the script for an sms token:
 ```bash
-node get-code.js sms
+node get_code.js sms
 ```

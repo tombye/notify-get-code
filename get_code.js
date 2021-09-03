@@ -1,16 +1,40 @@
 const fs = require('fs')
 const NotifyClient = require('notifications-node-client').NotifyClient;
 
-const args = process.argv.slice(2);
-
-if (!args.length) {
-  console.log('No notification type given. Choose sms or email');
-  process.exit(1);
-}
-
-const notificationType = args[0];
+let originAndPort = 'http://localhost:6012';
+let notificationType;
 let notifyClient;
 let apiKey;
+
+const args = process.argv.slice(2);
+
+function noNotificationType () {
+  console.log('No notification type given. Choose sms or email');
+  process.exit(1);
+};
+
+if (!args.length) {
+  noNotificationType();
+}
+
+if ((args[0] === '--help') || (args[0] === '-h')) {
+  console.log('usage: get_code.js [options] notification_type');
+  console.log('  options: --originandport: origin and port to use, ie. https://foo.com:6012');
+  console.log('');
+  console.log('notification_type must be one of [email|sms]');
+}
+else if (args[0] === '--originandport') {
+  originAndPort = args[1];
+
+  if (args.length < 3) {
+    noNotificationType();
+  }
+
+  notificationType = args[2];
+}
+else { // 1st argument is notification_type
+  notificationType = args[0];
+}
 
 function pbcopy(data) {
   var proc = require('child_process').spawn('pbcopy');
@@ -23,7 +47,11 @@ function getKeyFromNotification (content) {
     return content.match(/^\d+/)[0];
   }
   else { // email
-    return content.match(/http\:\/\/localhost\:6012\/[^\s]+/)[0];
+    const url = content.match(/http\:\/\/localhost\:6012\/[^\s]+/)[0];
+    if (originAndPort) {
+      return url.replace(/http\:\/\/localhost\:6012/, originAndPort);
+    }
+    return url;
   }
 };
 

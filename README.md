@@ -15,12 +15,12 @@ npm install
 
 Run the script for an email token:
 ```bash
-node get-code.js email
+node get_code.js email
 ```
 
 Run the script for an sms token:
 ```bash
-node get-code.js sms
+node get_code.js sms
 ```
 
 ### Setting your domain and port
@@ -28,5 +28,5 @@ node get-code.js sms
 The script assumes you're on http://localhost:6012 by default. If you're not, you can set both using
 the `--originandport` flag:
 ```bash
-node get-code.js --originandport example.com:9090 email
+node get_code.js --originandport example.com:9090 email
 ```

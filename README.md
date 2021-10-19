@@ -22,3 +22,11 @@ Run the script for an sms token:
 ```bash
 node get-code.js sms
 ```
+
+### Setting your domain and port
+
+The script assumes you're on http://localhost:6012 by default. If you're not, you can set both using
+the `--originandport` flag:
+```bash
+node get-code.js --originandport example.com:9090 email
+```

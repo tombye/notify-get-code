@@ -1,9 +1,16 @@
 const fs = require('fs')
 const NotifyClient = require('notifications-node-client').NotifyClient;
 
-let originAndPort = 'http://localhost:6012';
+// CHANGE THESE IF NOT USING https://github.com/alphagov/notifications-local to:
+//
+// const localApiProtocolAndOrigin = 'http://localhost';
+// const localAdminProtocolAndOrigin = 'http://localhost';
+const localApiProtocolAndOrigin = 'http://notify-api.localhost';
+const localAdminProtocolAndOrigin = 'http://notify.localhost';
+
 let notificationType;
 let notifyClient;
+let protocolAndOrigin;
 let apiKey;
 
 const args = process.argv.slice(2);
@@ -19,12 +26,12 @@ if (!args.length) {
 
 if ((args[0] === '--help') || (args[0] === '-h')) {
   console.log('usage: get_code.js [options] notification_type');
-  console.log('  options: --originandport: origin and port to use, ie. https://foo.com:6012');
+  console.log('  options: --protocolandorigin: protocolandorigin to use, ie. https://foo.com');
   console.log('');
   console.log('notification_type must be one of [email|sms]');
 }
-else if (args[0] === '--originandport') {
-  originAndPort = args[1];
+else if (args[0] === '--protocolandorigin') {
+  protocolAndOrigin = args[1];
 
   if (args.length < 3) {
     noNotificationType();
@@ -43,13 +50,15 @@ function pbcopy(data) {
 }
 
 function getKeyFromNotification (content) {
+  console.log(`getKeyFromNotification called`);
   if (notificationType === 'sms') {
     return content.match(/^\d+/)[0];
   }
   else { // email
-    const url = content.match(/http\:\/\/localhost\:6012\/[^\s]+/)[0];
-    if (originAndPort) {
-      return url.replace(/http\:\/\/localhost\:6012/, originAndPort);
+    const url = content.match(new RegExp(`${localAdminProtocolAndOrigin}:6012/\[^\\s]\+`, 'g'))[0];
+
+    if (protocolAndOrigin !== undefined) {
+      return url.replace(new RegExp(`${localAdminProtocolAndOrigin}:6012`, 'g'), `${protocolAndOrigin}:6012`);
     }
     return url;
   }
@@ -80,8 +89,9 @@ function getNotification () {
 
 fs.readFile('../notifications-functional-tests/environment_local.sh', 'utf8', (err, data) => {
   apiKey = '' + data.match(/export\sNOTIFY_SERVICE_API_KEY\='([^\n]+)'/)[1];
-  notifyClient = new NotifyClient('http://localhost:6011', apiKey);
+  notifyClient = new NotifyClient(`${localApiProtocolAndOrigin}:6011`, apiKey);
 
+  console.log(`apiOrigin: ${localApiProtocolAndOrigin}:6011`);
   console.log(`apiKey: ${apiKey}`);
   console.log(`notificationType: ${notificationType}`)
 
